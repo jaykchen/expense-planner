@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../models/transaction.dart';
+import '../providers/transaction_list_provider.dart';
 
-class TransactionList extends StatelessWidget {
+class TransactionListWidget extends StatelessWidget {
   final List<Transaction> transactions;
   final Function? deleteTx;
 
-  TransactionList(this.transactions, this.deleteTx);
+  TransactionListWidget(this.transactions, this.deleteTx);
 
   @override
   Widget build(BuildContext context) {

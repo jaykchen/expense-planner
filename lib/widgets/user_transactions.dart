@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import './new_transaction.dart';
 import './transaction_list.dart';
 import '../models/transaction.dart';
+import '../providers/transaction_list_provider.dart';
 
 class UserTransactions extends StatefulWidget {
   @override
@@ -43,8 +44,8 @@ class _UserTransactionsState extends State<UserTransactions> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        NewTransaction(_addNewTransaction),
-        TransactionList(_userTransactions, deleteTx()),
+        NewTransactionWidget(_addNewTransaction),
+        TransactionListWidget(_userTransactions, deleteTx()),
       ],
     );
   }

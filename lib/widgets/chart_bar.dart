@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../providers/transaction_list_provider.dart';
 
 class ChartBar extends StatelessWidget {
   final String? label;
