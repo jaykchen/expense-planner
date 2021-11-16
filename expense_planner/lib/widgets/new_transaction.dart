@@ -1,39 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../providers/transaction_list_provider.dart';
+import '../models/transaction.dart';
 
-class NewTransaction extends StatefulWidget {
+class NewTransactionWidget extends ConsumerStatefulWidget {
   final Function addTx;
 
-  NewTransaction(this.addTx);
+  NewTransactionWidget(this.addTx);
 
   @override
-  _NewTransactionState createState() => _NewTransactionState();
+  ConsumerState createState() => _NewTransactionWidgetState();
 }
 
-class _NewTransactionState extends State<NewTransaction> {
+class _NewTransactionWidgetState extends ConsumerState<NewTransactionWidget> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
-  DateTime _selectedDate;
+  DateTime? _selectedDate;
 
-  void _submitData() {
-    if (_amountController.text.isEmpty) {
-      return;
-    }
-    final enteredTitle = _titleController.text;
-    final enteredAmount = double.parse(_amountController.text);
-
-    if (enteredTitle.isEmpty || enteredAmount <= 0 || _selectedDate == null) {
-      return;
-    }
-
-    widget.addTx(
-      enteredTitle,
-      enteredAmount,
-      _selectedDate,
-    );
-
-    Navigator.of(context).pop();
-  }
 
   void _presentDatePicker() {
     showDatePicker(
@@ -54,6 +39,7 @@ class _NewTransactionState extends State<NewTransaction> {
 
   @override
   Widget build(BuildContext context) {
+    final lis = ref.watch(transactionListProvider);
     return Card(
       elevation: 5,
       child: Container(
@@ -64,7 +50,6 @@ class _NewTransactionState extends State<NewTransaction> {
             TextField(
               decoration: InputDecoration(labelText: 'Title'),
               controller: _titleController,
-              onSubmitted: (_) => _submitData(),
               // onChanged: (val) {
               //   titleInput = val;
               // },
@@ -73,7 +58,6 @@ class _NewTransactionState extends State<NewTransaction> {
               decoration: InputDecoration(labelText: 'Amount'),
               controller: _amountController,
               keyboardType: TextInputType.number,
-              onSubmitted: (_) => _submitData(),
             ),
             Container(
               height: 70,
@@ -83,11 +67,12 @@ class _NewTransactionState extends State<NewTransaction> {
                     child: Text(
                       _selectedDate == null
                           ? 'No Date Chosen!'
-                          : 'Picked Date: ${DateFormat.yMd().format(_selectedDate)}',
+                          : 'Picked Date: ${DateFormat.yMd().format(
+                          _selectedDate!)}',
                     ),
                   ),
                   FlatButton(
-                    textColor: Theme.of(context).primaryColor,
+                    // textColor: Theme.of(context).primaryColor,
                     child: Text(
                       'Choose Date',
                       style: TextStyle(
@@ -101,9 +86,35 @@ class _NewTransactionState extends State<NewTransaction> {
             ),
             RaisedButton(
               child: Text('Add Transaction'),
-              color: Theme.of(context).primaryColor,
-              textColor: Theme.of(context).textTheme.button.color,
-              onPressed: _submitData,
+              // color: Theme.of(context).primaryColor,
+              // textColor: Theme.of(context).textTheme.button.color,
+              onPressed: () {
+                if (_amountController.text.isEmpty) {
+                  return;
+                }
+                final enteredTitle = _titleController.text;
+                final enteredAmount = double.parse(_amountController.text);
+
+                if (enteredTitle.isEmpty || enteredAmount <= 0 ||
+                    _selectedDate == null) {
+                  return;
+                }
+                lis.add(
+                    Transaction(
+                      id: DateTime.now().toString(),
+                      title: enteredTitle,
+                      amount: enteredAmount,
+                      date: _selectedDate!,
+                    ));
+                widget.addTx(
+                  enteredTitle,
+                  enteredAmount,
+                  _selectedDate,
+                );
+
+                Navigator.of(context).pop();
+              }
+              ,
             ),
           ],
         ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import './new_transaction.dart';
 import './transaction_list.dart';
 import '../models/transaction.dart';
+import '../providers/transaction_list_provider.dart';
 
 class UserTransactions extends StatefulWidget {
   @override
@@ -10,7 +11,7 @@ class UserTransactions extends StatefulWidget {
 }
 
 class _UserTransactionsState extends State<UserTransactions> {
-  Function deleteTx;
+  late Function deleteTx;
   final List<Transaction> _userTransactions = [
     Transaction(
       id: 't1',

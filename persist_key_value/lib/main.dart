@@ -1,68 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 void main() {
-  runApp(MaterialApp(
-      // Disable the debug flag
-      debugShowCheckedModeBanner: false,
-      // Home
-      home: MyHome()));
+  runApp(ProviderScope(
+    child: MaterialApp(
+        // Disable the debug flag
+        debugShowCheckedModeBanner: false,
+        // Home
+        home: MyHome()),
+  ));
 }
 
-class MyHome extends StatefulWidget {
-  @override
-  MyHomeState createState() {
-    return MyHomeState();
+class Pref {
+
+  Pref([required this.pref], {this.counter, this.key});
+  SharedPreferences  pref = SharedPreferences.getInstance() as SharedPreferences;
+
+  int counter = 0;
+  var key = "counter";
+
+  void _loadSavedData(SharedPreferences pref) async {
+    counter = (pref.getInt(key) ?? 0);
   }
+
+  void _onIncrementHit(SharedPreferences pref) async {
+    counter = (pref.getInt(key) ?? 0) + 1;
+
+    pref.setInt(key, counter);
+  }
+
+  void _onDecrementHit(SharedPreferences pref) async {
+    counter = (pref.getInt(key) ?? 0) - 1;
+    pref.setInt(key, counter);
+  }
+
 }
 
-class MyHomeState extends State<MyHome> {
+class MyHome extends StatelessWidget {
   var nameOfApp = "Persist Key Value";
 
-  var counter = 0;
-
-  // define a key to use later
-  var key = "counter";
 
   @override
   void initState() {
-    super.initState();
-    _loadSavedData();
-  }
-
-  _loadSavedData() async {
-    // Get shared preference instance
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      // Get value
-      counter = (prefs.getInt(key) ?? 0);
-    });
-  }
-
-  _onIncrementHit() async {
-    // Get shared preference instance
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      // Get value
-      counter = (prefs.getInt(key) ?? 0) + 1;
-    });
-
-    // Save Value
-    prefs.setInt(key, counter);
-  }
-
-  _onDecrementHit() async {
-    // Get shared preference instance
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      // Get value
-      counter = (prefs.getInt(key) ?? 0) - 1;
-    });
-
-    // Save Value
-    prefs.setInt(key, counter);
+    _loadSavedData(pref as SharedPreferences);
   }
 
   @override
@@ -81,16 +63,16 @@ class MyHomeState extends State<MyHome> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                '$counter',
+                '${counter}',
                 textScaleFactor: 10.0,
               ),
               Padding(padding: EdgeInsets.all(10.0)),
               RaisedButton(
-                  onPressed: _onIncrementHit,
+                  onPressed: () => _onIncrementHit(pref as SharedPreferences),
                   child: Text('Increment Counter')),
               Padding(padding: EdgeInsets.all(10.0)),
               RaisedButton(
-                  onPressed: _onDecrementHit,
+                  onPressed: () => _onDecrementHit(pref as SharedPreferences),
                   child: Text('Decrement Counter')),
             ],
           ),

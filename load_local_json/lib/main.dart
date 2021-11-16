@@ -1,12 +1,71 @@
 import 'dart:convert';
+import 'package:riverpod/riverpod.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'dart:async';
+import 'dart:io';
 
-void main() {
-  runApp(MaterialApp(
-    home: MyApp(),
+import 'package:flutter/foundation.dart';
+
+Future<void> main() async {
+  runApp(ProviderScope(
+    child: MaterialApp(
+      home: MyApp(),
+    ),
   ));
 }
+
+class Reader {
+  Future<String> readJson() async {
+    // String holder = '''[{
+    //   "name": "Changed",
+    // "height": "167",
+    // "mass": "75",
+    // "hair_color": "n/a",
+    // "skin_color": "gold",
+    // "eye_color": "yellow",
+    // "birth_year": "112BBY",
+    // "gender": "n/a"
+    // },{
+    //   "name": "Changed",
+    // "height": "167",
+    // "mass": "75",
+    // "hair_color": "n/a",
+    // "skin_color": "gold",
+    // "eye_color": "yellow",
+    // "birth_year": "112BBY",
+    // "gender": "n/a"
+    // }]''';
+    late String contents;
+
+    try {
+      var path = await Directory(
+              '/home/jaykchen/AndroidStudioProjects/flutter-examples/load_local_json/data_repo');
+      var file = File('${path.path}/starwars_data.json');
+      contents = await file.readAsString();
+    } catch (e) {
+      print(e);
+    }
+    return contents;
+  }
+}
+
+class ReaderProvider extends StateNotifier<Future<String>> {
+  ReaderProvider() : super('' as Future<String>);
+
+  Future<String> getRaw() {
+    return Reader().readJson();
+  }
+}
+
+final jsonProvider = FutureProvider<Future<String>>(
+    (ref) => Reader().readJson());
+// final jsonProvider = FutureProvider((ref) async {
+//   final jsonClient = ref.watch(readerProvider);
+//   return jsonClient;
+// });
 
 class MyApp extends StatefulWidget {
   @override
@@ -14,7 +73,6 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  List data;
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +84,7 @@ class MyAppState extends State<MyApp> {
           child: Center(
             // Use future builder and DefaultAssetBundle to load the local JSON file
             child: FutureBuilder(
-                future: DefaultAssetBundle
-                    .of(context)
-                    .loadString('data_repo/starwars_data.json'),
+                future: Reader().readJson(),
                 builder: (context, snapshot) {
                   // Decode the JSON
                   var new_data = json.decode(snapshot.data.toString());
