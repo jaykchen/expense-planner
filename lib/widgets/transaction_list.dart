@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../models/transaction.dart';
 import '../providers/transaction_list_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class TransactionListWidget extends StatelessWidget {
-  final List<Transaction> transactions;
-  final Function? deleteTx;
-
-  TransactionListWidget(this.transactions, this.deleteTx);
-
+class TransactionListWidget extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
+    final transactions = ref.watch(transactionListProvider);
     return Container(
       height: 450,
       child: transactions.isEmpty
@@ -19,7 +16,7 @@ class TransactionListWidget extends StatelessWidget {
               children: <Widget>[
                 Text(
                   'No transactions added yet!',
-              ),
+                ),
                 SizedBox(
                   height: 20,
                 ),
@@ -59,7 +56,9 @@ class TransactionListWidget extends StatelessWidget {
                     trailing: IconButton(
                       icon: Icon(Icons.delete),
                       // color: Theme.of(context).errorColor,
-                      onPressed: () => deleteTx!(transactions[index].id),
+                      onPressed: () => ref
+                          .read(transactionListProvider.notifier)
+                          .remove(index),
                     ),
                   ),
                 );

@@ -3,50 +3,69 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../models/transaction.dart';
 
-class TransactionList extends StateNotifier<List<Transaction?>> {
+final transactionListProvider =
+    StateNotifierProvider<TransactionList, List<Transaction>>((ref) {
+  return TransactionList([
+    Transaction(
+      id: 't1',
+      title: 'New Shoes',
+      amount: 69.99,
+      date: DateTime.now(),
+    ),
+    Transaction(
+      id: 't2',
+      title: 'Weekly Groceries',
+      amount: 16.53,
+      date: DateTime.now(),
+    ),
+  ]);
+});
 
-  List<Transaction?> lis =[];
+class TransactionList extends StateNotifier<List<Transaction>> {
+  TransactionList([List<Transaction>? initialTransactions])
+      : super(initialTransactions ?? []);
 
-  TransactionList() : super([]);
-
-  void add(Transaction transact) {
-    if (lis != null) {
-      lis.add(transact);
-
-    } else {
-      lis = [transact];
-    }
+  void add(String enteredTitle, double enteredAmount, DateTime _selectedDate) {
+    state = [
+      ...state,
+      Transaction(
+        id: DateTime.now().toString(),
+        title: enteredTitle,
+        amount: enteredAmount,
+        date: _selectedDate,
+      ),
+    ];
   }
 
-  void _deleteTransaction(String id) {
-    lis.removeWhere((tx) => tx!.id == id);
-  }
-
-  List<Transaction?> get _recentTransactions {
-    return lis.where((tx) {
-      return tx!.date.isAfter(
-        DateTime.now().subtract(
-          Duration(days: 7),
-        ),
-      );
-    }).toList();
+// void toggle(String id) {
+//   state = [
+//     for (final todo in state)
+//       if (todo.id == id)
+//         Todo(
+//           id: todo.id,
+//           completed: !todo.completed,
+//           description: todo.description,
+//         )
+//       else
+//         todo,
+//   ];
+// }
+//
+// void edit({required String id, required String description}) {
+//   state = [
+//     for (final todo in state)
+//       if (todo.id == id)
+//         Todo(
+//           id: todo.id,
+//           completed: todo.completed,
+//           description: description,
+//         )
+//       else
+//         todo,
+//   ];
+// }
+//
+  void remove(int index) {
+    state = state.where((transact) => transact != state[index]).toList();
   }
 }
-
-// void _addNewTransaction(String txTitle, double txAmount,
-//     DateTime chosenDate) {
-//   final newTx = Transaction(
-//     title: txTitle,
-//     amount: txAmount,
-//     date: chosenDate,
-//     id: DateTime.now().toString(),
-//   );
-//
-//   setState(() {
-//     _userTransactions.add(newTx);
-//   });
-// }
-
-final transactionListProvider = StateNotifierProvider<TransactionList,
-    List<Transaction?>>((ref) => TransactionList());
-
